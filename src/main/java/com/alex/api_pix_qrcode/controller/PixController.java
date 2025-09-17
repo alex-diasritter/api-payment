@@ -1,7 +1,6 @@
 package com.alex.api_pix_qrcode.controller;
 import com.alex.api_pix_qrcode.dto.PixRequestDto;
 import com.alex.api_pix_qrcode.service.PixService;
-import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -21,7 +20,7 @@ public class PixController {
     }
 
     @PostMapping
-    public ResponseEntity pix(@RequestBody @Valid PixRequestDto client) {
+    public ResponseEntity pix(@RequestBody PixRequestDto client) {
         var response = pixService.createClientAndPaymentPix(client);
         return ResponseEntity.ok()
                 .contentType(MediaType.APPLICATION_JSON)

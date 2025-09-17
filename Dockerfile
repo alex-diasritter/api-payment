@@ -1,16 +1,25 @@
 # Build stage
-FROM maven:3.9.4-openjdk-17 AS build
+FROM openjdk:21-jdk-slim AS build
+
+# Install Maven
+RUN apt-get update && apt-get install -y maven && rm -rf /var/lib/apt/lists/*
+
 WORKDIR /app
 
 # Copy Maven files
 COPY pom.xml .
+COPY mvnw .
+COPY .mvn .mvn
+RUN chmod +x mvnw
+
+# Copy source
 COPY src src
 
 # Build application
-RUN mvn clean package -DskipTests
+RUN ./mvnw clean package -DskipTests
 
 # Runtime stage
-FROM openjdk:17-jdk-slim
+FROM openjdk:21-jdk-slim
 WORKDIR /app
 
 # Install curl for health checks
