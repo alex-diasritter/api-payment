@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Pagamento Pix</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+<div class="container">
+
+    <div class="header">
+        <h2>Pagamento Pix</h2>
+        <p>Preencha os dados para continuar</p>
+    </div>
+
+    <form id="pixForm">
+        <div class="form-group">
+            <label for="name">Nome:</label>
+            <input type="text" id="name" name="name" required>
+        </div>
+
+        <div class="form-group">
+            <label for="cpfCnpj">CPF:</label>
+            <input type="text" id="cpfCnpj" name="cpfCnpj" required>
+        </div>
+
+        <div class="form-group">
+            <label for="value">Valor (mínimo R$ 5,00):</label>
+            <input type="number" id="value" name="value" min="5" step="0.01" required>
+        </div>
+
+        <button type="submit">Gerar Pagamento</button>
+    </form>
+
+    <p id="mensagem"></p>
+
+</div> <script>
+    const form = document.getElementById('pixForm');
+const mensagem = document.getElementById('mensagem');
+
+form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    const data = {
+        name: form.name.value,
+        cpfCnpj: form.cpfCnpj.value,
+        value: form.value.value         };
+
+    try {
+        const response = await fetch('/api/pix', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data)
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            mensagem.textContent = 'Erro: ' + JSON.stringify(errorData);
+            return;
+        }
+
+        // Seu backend retorna a URL como string
+        const linkPagamento = await response.text();
+
+        // Redireciona para a página de pagamento Asaas
+        window.location.href = linkPagamento;
+
+    } catch (err) {
+        console.error(err);
+        mensagem.textContent = 'Erro ao criar pagamento. Verifique o console.';
+    }
+});
+</script>
+
+</body>
+</html>
