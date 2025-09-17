@@ -147,8 +147,8 @@
         const value = parseFloat(valueStr);
         const error = document.getElementById('valueError');
 
-        if (isNaN(value) || value < 5) {
-            error.textContent = 'Valor mínimo é R$ 5,00';
+        if (isNaN(value) || value < 0.01) {
+            error.textContent = 'Valor não pode ser 0.00';
             return false;
         }
 
