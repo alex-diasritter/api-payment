@@ -16,6 +16,8 @@ public class PixService {
     @Value("${KEY}")
     private String key;
 
+    private static final String USER_AGENT = "MeuAppPIX/1.0";
+
     public String createClientAndPaymentPix(PixRequestDto pix) {
 
         JSONObject json = new JSONObject();
@@ -25,10 +27,12 @@ public class PixService {
         String jsonBody = json.toString();
 
         HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create("https://api-sandbox.asaas.com/v3/customers"))
+
+                .uri(URI.create("https://api.asaas.com/v3/customers"))
                 .header("accept", "application/json")
                 .header("content-type", "application/json")
                 .header("access_token", key)
+                .header("User-Agent", USER_AGENT)
                 .POST(HttpRequest.BodyPublishers.ofString(jsonBody))
                 .build();
 
@@ -63,9 +67,10 @@ public class PixService {
 
         String jsonBody = json.toString();
         HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create("https://api-sandbox.asaas.com/v3/payments"))
+                .uri(URI.create("https://api.asaas.com/v3/payments"))
                 .header("accept", "application/json")
                 .header("content-type", "application/json")
+                .header("User-Agent", USER_AGENT)
                 .header("access_token", key)
                 .POST(HttpRequest.BodyPublishers.ofString(jsonBody))
                 .build();
