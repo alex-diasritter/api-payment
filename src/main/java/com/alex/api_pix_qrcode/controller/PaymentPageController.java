@@ -11,4 +11,11 @@ public class PaymentPageController {
         // retorna o nome do arquivo HTML sem extensão
         return "pagamentos";  // src/main/resources/templates/pagamentos.html
     }
+
+
+    @GetMapping("/")
+    public String home() {
+        return "pagamentos"; // retorna pagamentos.html
+    }
 }
+
