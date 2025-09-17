@@ -16,7 +16,7 @@ public class PixService {
     @Value("${KEY}")
     private String key;
 
-    public String createClient(PixRequestDto pix) {
+    public String createClientAndPaymentPix(PixRequestDto pix) {
 
         JSONObject json = new JSONObject();
         json.put("name", pix.name());
