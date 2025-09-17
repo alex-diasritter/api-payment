@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <title>Pagamento Pix</title>
     <link rel="stylesheet" th:href="@{/css/style.css}">
+
 </head>
 <body>
 <div class="container">
@@ -16,60 +17,220 @@
     <form id="pixForm">
         <div class="form-group">
             <label for="name">Nome:</label>
-            <input type="text" id="name" name="name" required>
+            <input type="text" id="name" name="name" required minlength="2" maxlength="50">
+            <div class="error" id="nameError"></div>
         </div>
 
         <div class="form-group">
             <label for="cpfCnpj">CPF:</label>
-            <input type="text" id="cpfCnpj" name="cpfCnpj" required>
+            <input type="text" id="cpfCnpj" name="cpfCnpj" required placeholder="000.000.000-00" maxlength="14">
+            <div class="error" id="cpfError"></div>
         </div>
 
         <div class="form-group">
             <label for="value">Valor (mínimo R$ 5,00):</label>
-            <input type="number" id="value" name="value" min="5" step="0.01" required>
+            <input type="text" id="value" name="value" required placeholder="0,00" maxlength="10">
+            <div class="error" id="valueError"></div>
         </div>
 
-        <button type="submit">Gerar Pagamento</button>
+        <button type="submit" id="submitBtn">Gerar Pagamento</button>
     </form>
 
     <p id="mensagem"></p>
 
-</div> <script>
+</div>
+
+<script>
     const form = document.getElementById('pixForm');
-const mensagem = document.getElementById('mensagem');
+    const mensagem = document.getElementById('mensagem');
+    const submitBtn = document.getElementById('submitBtn');
 
-form.addEventListener('submit', async (e) => {
-    e.preventDefault();
+    // Máscara e validação de CPF
+    const cpfInput = document.getElementById('cpfCnpj');
+    cpfInput.addEventListener('input', (e) => {
+        let value = e.target.value.replace(/\D/g, ''); // Remove não-dígitos
 
-    const data = {
-        name: form.name.value,
-        cpfCnpj: form.cpfCnpj.value,
-        value: form.value.value         };
+        // Aplica máscara CPF
+        if (value.length <= 11) {
+            value = value.replace(/(\d{3})(\d)/, '$1.$2');
+            value = value.replace(/(\d{3})(\d)/, '$1.$2');
+            value = value.replace(/(\d{3})(\d{1,2})$/, '$1-$2');
+        }
 
-    try {
-        const response = await fetch('/api/pix', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(data)
-        });
+        e.target.value = value;
+        validateCPF();
+    });
 
-        if (!response.ok) {
-            const errorData = await response.json();
-            mensagem.textContent = 'Erro: ' + JSON.stringify(errorData);
+    // Máscara de valor monetário
+    const valueInput = document.getElementById('value');
+    valueInput.addEventListener('input', (e) => {
+        let value = e.target.value.replace(/\D/g, '');
+
+        if (value.length > 0) {
+            value = (parseInt(value) / 100).toFixed(2);
+            value = value.replace('.', ',');
+            value = value.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+        }
+
+        e.target.value = value;
+        validateValue();
+    });
+
+    // Validação de nome
+    const nameInput = document.getElementById('name');
+    nameInput.addEventListener('input', validateName);
+
+    function validateName() {
+        const name = nameInput.value.trim();
+        const error = document.getElementById('nameError');
+
+        if (name.length < 2) {
+            error.textContent = 'Nome deve ter pelo menos 2 caracteres';
+            return false;
+        }
+
+        if (!/^[A-Za-zÀ-ÿ\s]+$/.test(name)) {
+            error.textContent = 'Nome deve conter apenas letras';
+            return false;
+        }
+
+        error.textContent = '';
+        return true;
+    }
+
+    function validateCPF() {
+        const cpf = cpfInput.value.replace(/\D/g, '');
+        const error = document.getElementById('cpfError');
+
+        if (cpf.length !== 11) {
+            error.textContent = 'CPF deve ter 11 dígitos';
+            return false;
+        }
+
+        // Verifica sequências iguais
+        if (/^(\d)\1+$/.test(cpf)) {
+            error.textContent = 'CPF inválido';
+            return false;
+        }
+
+        // Algoritmo de validação CPF
+        let sum = 0;
+        for (let i = 0; i < 9; i++) {
+            sum += parseInt(cpf[i]) * (10 - i);
+        }
+        let digit1 = (sum * 10) % 11;
+        if (digit1 === 10) digit1 = 0;
+
+        if (digit1 !== parseInt(cpf[9])) {
+            error.textContent = 'CPF inválido';
+            return false;
+        }
+
+        sum = 0;
+        for (let i = 0; i < 10; i++) {
+            sum += parseInt(cpf[i]) * (11 - i);
+        }
+        let digit2 = (sum * 10) % 11;
+        if (digit2 === 10) digit2 = 0;
+
+        if (digit2 !== parseInt(cpf[10])) {
+            error.textContent = 'CPF inválido';
+            return false;
+        }
+
+        error.textContent = '';
+        return true;
+    }
+
+    function validateValue() {
+        const valueStr = valueInput.value.replace(/\./g, '').replace(',', '.');
+        const value = parseFloat(valueStr);
+        const error = document.getElementById('valueError');
+
+        if (isNaN(value) || value < 5) {
+            error.textContent = 'Valor mínimo é R$ 5,00';
+            return false;
+        }
+
+        if (value > 1000000) {
+            error.textContent = 'Valor máximo é R$ 1.000.000,00';
+            return false;
+        }
+
+        error.textContent = '';
+        return true;
+    }
+
+    function validateForm() {
+        return validateName() && validateCPF() && validateValue();
+    }
+
+    form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        if (!validateForm()) {
+            mensagem.textContent = 'Por favor, corrija os erros acima';
+            mensagem.style.color = '#e74c3c';
             return;
         }
 
-        // Seu backend retorna a URL como string
-        const linkPagamento = await response.text();
+        // Estado de loading
+        submitBtn.textContent = 'Processando...';
+        submitBtn.disabled = true;
+        form.classList.add('loading');
+        mensagem.textContent = '';
 
-        // Redireciona para a página de pagamento Asaas
-        window.location.href = linkPagamento;
+        const data = {
+            name: form.name.value.trim(),
+            cpfCnpj: form.cpfCnpj.value.replace(/\D/g, ''), // Remove máscara
+            value: form.value.value.replace(/\./g, '').replace(',', '.') // Converte para formato americano
+        };
 
-    } catch (err) {
-        console.error(err);
-        mensagem.textContent = 'Erro ao criar pagamento. Verifique o console.';
-    }
-});
+        try {
+            const response = await fetch('/api/pix', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+
+            if (!response.ok) {
+                let errorMessage = 'Erro no servidor';
+                try {
+                    const errorData = await response.json();
+                    errorMessage = errorData.message || errorMessage;
+                } catch (e) {
+                    errorMessage = `Erro ${response.status}: ${response.statusText}`;
+                }
+
+                throw new Error(errorMessage);
+            }
+
+            const linkPagamento = await response.text();
+
+            mensagem.textContent = 'Redirecionando para pagamento...';
+            mensagem.style.color = '#27ae60';
+
+            // Pequeno delay para mostrar mensagem
+            setTimeout(() => {
+                window.location.href = linkPagamento;
+            }, 1000);
+
+        } catch (err) {
+            console.error('Erro:', err);
+            mensagem.textContent = err.message || 'Erro ao criar pagamento. Tente novamente.';
+            mensagem.style.color = '#e74c3c';
+        } finally {
+            // Restaura botão
+            submitBtn.textContent = 'Gerar Pagamento';
+            submitBtn.disabled = false;
+            form.classList.remove('loading');
+        }
+    });
+
+    // Validação em tempo real
+    [nameInput, cpfInput, valueInput].forEach(input => {
+        input.addEventListener('blur', validateForm);
+    });
 </script>
 
 </body>
