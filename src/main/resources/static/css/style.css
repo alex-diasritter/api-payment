@@ -96,3 +96,18 @@ button:hover {
     text-align: center;
     color: #f8d7da; /* Cor padrão para mensagens de erro */
 }
+.error {
+    color: #e74c3c;
+    font-size: 0.9em;
+    margin-top: 5px;
+}
+.loading {
+    opacity: 0.7;
+    pointer-events: none;
+}
+.form-group {
+    margin-bottom: 15px;
+}
+.success {
+    color: #27ae60;
+}
