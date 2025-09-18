@@ -1,4 +1,3 @@
-/* --- RESET E ESTILO GERAL --- */
 * {
     margin: 0;
     padding: 0;
@@ -16,14 +15,14 @@ body {
     padding: 20px;
 }
 
-/* --- O CONTAINER QUE CRIA O "CARD" CENTRALIZADO E PEQUENO --- */
+/* --- O CONTAINER QUE CRIA O "CARD" CENTRALIZADO --- */
 .container {
     background: #2c2c3e;
     padding: 30px;
     border-radius: 12px;
     box-shadow: 0 8px 30px rgba(0, 0, 0, 0.5);
     width: 100%;
-    max-width: 400px; /* Limita a largura máxima do formulário */
+    max-width: 400px;
 }
 
 /* --- CABEÇALHO DO FORMULÁRIO --- */
@@ -47,18 +46,18 @@ form {
     width: 100%;
     display: flex;
     flex-direction: column;
-    gap: 15px; /* Espaçamento entre os campos */
 }
 
 .form-group {
+    margin-bottom: 15px;
     display: flex;
     flex-direction: column;
-    text-align: left; /* Alinha o texto da label à esquerda */
+    text-align: left;
     gap: 5px;
 }
 
 input {
-    width: 100%; /* O input ocupa 100% do container, que já é pequeno */
+    width: 100%;
     padding: 12px 15px;
     border-radius: 8px;
     border: 1px solid #555;
@@ -83,7 +82,7 @@ button {
     font-size: 15px;
     font-weight: 600;
     cursor: pointer;
-    margin-top: 10px; /* Um espaço extra antes do botão */
+    margin-top: 10px;
     transition: background-color 0.3s ease;
 }
 
@@ -94,20 +93,63 @@ button:hover {
 #mensagem {
     margin-top: 20px;
     text-align: center;
-    color: #f8d7da; /* Cor padrão para mensagens de erro */
+    color: #f8d7da;
 }
+
 .error {
     color: #e74c3c;
     font-size: 0.9em;
     margin-top: 5px;
 }
+
 .loading {
     opacity: 0.7;
     pointer-events: none;
 }
-.form-group {
-    margin-bottom: 15px;
-}
+
 .success {
     color: #27ae60;
+}
+
+#pixDetails {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+    width: 100%;
+}
+
+.qr-code {
+    width: 100%;
+    max-width: 250px;
+    height: auto;
+    border-radius: 8px;
+    background: white;
+    padding: 10px;
+}
+
+.payload-container {
+    display: flex;
+    width: 100%;
+    gap: 10px;
+}
+
+#pixPayload {
+    flex-grow: 1;
+    font-size: 12px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.copy-btn {
+    padding: 10px 15px;
+    margin-top: 0;
+    flex-shrink: 0;
+}
+
+.expiration-text, .info-text {
+    font-size: 14px;
+    color: #aaaaaa;
+    text-align: center;
 }
