@@ -1,6 +1,9 @@
 package com.alex.api_pix_qrcode.service;
 
+import com.alex.api_pix_qrcode.controller.PixController;
 import com.alex.api_pix_qrcode.dto.PixRequestDto;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -10,11 +13,11 @@ import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 @Service
 public class EmailService {
+
+    private static final Logger logger = LoggerFactory.getLogger(PixController.class);
 
     List<String> list = new ArrayList<>();
     private int cont = 0;
@@ -36,8 +39,8 @@ public class EmailService {
         NumberFormat formatter = NumberFormat.getCurrencyInstance(new Locale("pt", "BR"));
         String formattedValue = formatter.format(value);
         String text = String.format(
-                "Olá %s,\n\nRecebemos seu pagamento de %s via Pix.\n\nObrigado por utilizar nosso serviço!\n\nAtenciosamente,\nEquipe Pix QRCode",
-                customerName, value
+                "Saudações!,\nRecebemos seu pagamento de via Pix no valor de: R$ %.2f..\n\nObrigado por utilizar nosso serviço!\n\nAtenciosamente,\nEquipe Pix QRCode",
+                value
         );
         sendEmail(email, subject, text);
     }
@@ -49,5 +52,6 @@ public class EmailService {
         message.setSubject(subject);
         message.setText(text);
         mailSender.send(message);
+        logger.info("email enviado para: " + to);
     }
 }
