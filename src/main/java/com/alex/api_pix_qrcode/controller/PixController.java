@@ -25,9 +25,9 @@ public class PixController {
 
     @PostMapping
     public ResponseEntity<PixResponseDto> pix(@RequestBody PixRequestDto dto) {
-        emailService.storeUserInfo(dto);
         logger.info("Enpoint PIX acionado. Gerando pix para: " + dto.email());
         var response = pixService.createStaticQRCode();
+        emailService.storeUserInfo(dto);
         return ResponseEntity.ok()
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(response);
