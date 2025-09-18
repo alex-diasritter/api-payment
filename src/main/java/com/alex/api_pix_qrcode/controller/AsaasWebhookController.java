@@ -28,10 +28,7 @@ public class AsaasWebhookController {
             String paymentId = (String) payment.get("id");
             String customerName = (String) payment.get("customer");
             Double value = Double.valueOf(payment.get("value").toString());
-
-            emailService.storePaymentInfo(customerName, value);
-            emailService.sendEmailNotification(customerName);
-
+            emailService.sendEmailNotification(customerName, value);
             logger.info("Pagamento recebido! ID: " + paymentId + ", Cliente: " + customerName + ", Valor: R$" + value);
         }
 
