@@ -1,23 +1,39 @@
+/* --- IMPORTAÇÃO DE FONTE E VARIÁVEIS GLOBAIS --- */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap');
+
+:root {
+    --bg-dark: #1e1e2f;
+    --surface-dark: #2c2c3e;
+    --primary-blue: #4e9af1;
+    --primary-blue-hover: #3671c3;
+    --text-primary: #f0f0f0;
+    --text-secondary: #aaaaaa;
+    --border-color: #555;
+    --error-red: #e74c3c;
+    --success-green: #27ae60;
+}
+
 * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
+/* --- ESTILO BASE DO CORPO DA PÁGINA --- */
 body {
     display: flex;
     justify-content: center;
     align-items: center;
     min-height: 100vh;
-    background: #1e1e2f;
-    color: #f0f0f0;
+    background: var(--bg-dark);
+    color: var(--text-primary);
+    font-family: 'Poppins', sans-serif;
     padding: 20px;
 }
 
-/* --- O CONTAINER QUE CRIA O "CARD" CENTRALIZADO --- */
+/* --- CONTAINER PRINCIPAL (CARD) --- */
 .container {
-    background: #2c2c3e;
+    background: var(--surface-dark);
     padding: 30px;
     border-radius: 12px;
     box-shadow: 0 8px 30px rgba(0, 0, 0, 0.5);
@@ -33,84 +49,91 @@ body {
 
 .header h2 {
     margin-bottom: 5px;
-    color: #ffffff;
+    font-weight: 600;
 }
 
 .header p {
     font-size: 14px;
-    color: #aaaaaa;
+    color: var(--text-secondary);
 }
 
-/* --- ESTILO DO FORMULÁRIO E SEUS ELEMENTOS --- */
-form {
-    width: 100%;
-    display: flex;
-    flex-direction: column;
-}
-
+/* --- GRUPO DE ELEMENTOS DO FORMULÁRIO --- */
 .form-group {
     margin-bottom: 15px;
-    display: flex;
-    flex-direction: column;
     text-align: left;
-    gap: 5px;
 }
 
+label {
+    display: block;
+    margin-bottom: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text-secondary);
+}
+
+/* --- ESTILOS DE INPUT --- */
 input {
     width: 100%;
     padding: 12px 15px;
     border-radius: 8px;
-    border: 1px solid #555;
-    background: #1f1f2e;
-    color: #f0f0f0;
+    border: 1px solid var(--border-color);
+    background: var(--bg-dark);
+    color: var(--text-primary);
     font-size: 14px;
     transition: all 0.3s ease;
 }
 
 input:focus {
-    border-color: #4e9af1;
+    border-color: var(--primary-blue);
     box-shadow: 0 0 8px rgba(78, 154, 241, 0.5);
     outline: none;
+    transform: translateY(-2px); /* Efeito sutil de elevação */
 }
 
+/* --- ESTILOS DE BOTÃO --- */
 button {
+    width: 100%;
     padding: 14px;
     border: none;
     border-radius: 8px;
-    background: #4e9af1;
+    background: var(--primary-blue);
     color: #ffffff;
     font-size: 15px;
     font-weight: 600;
     cursor: pointer;
     margin-top: 10px;
-    transition: background-color 0.3s ease;
+    transition: all 0.3s ease;
 }
 
-button:hover {
-    background: #3671c3;
+button:hover:not(:disabled) {
+    background: var(--primary-blue-hover);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(78, 154, 241, 0.3);
 }
 
+button:disabled {
+    background-color: #555;
+    cursor: not-allowed;
+    opacity: 0.7;
+}
+
+/* --- CLASSES DE UTILIDADE (ERRO, SUCESSO, ETC.) --- */
 #mensagem {
     margin-top: 20px;
     text-align: center;
-    color: #f8d7da;
 }
 
 .error {
-    color: #e74c3c;
-    font-size: 0.9em;
+    color: var(--error-red);
+    font-size: 12px;
     margin-top: 5px;
 }
 
-.loading {
-    opacity: 0.7;
-    pointer-events: none;
-}
-
 .success {
-    color: #27ae60;
+    color: var(--success-green);
 }
 
+/* --- DETALHES DO PIX (QR CODE) --- */
 #pixDetails {
     display: flex;
     flex-direction: column;
@@ -150,6 +173,13 @@ button:hover {
 
 .expiration-text, .info-text {
     font-size: 14px;
-    color: #aaaaaa;
+    color: var(--text-secondary);
     text-align: center;
+}
+
+/* --- AJUSTE PARA TELAS MENORES --- */
+@media (max-width: 480px) {
+    .container {
+        padding: 20px;
+    }
 }

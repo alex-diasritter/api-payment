@@ -15,12 +15,6 @@
 
     <form id="pixForm">
         <div class="form-group">
-            <label for="name">Nome:</label>
-            <input type="text" id="name" name="name" required minlength="2" maxlength="50">
-            <div class="error" id="nameError"></div>
-        </div>
-
-        <div class="form-group">
             <label for="email">Email:</label>
             <input type="email" id="email" name="email" required placeholder="seu@email.com">
             <div class="error" id="emailError"></div>
@@ -45,7 +39,6 @@
 
 <script>
     const form = document.getElementById('pixForm');
-    const nameInput = document.getElementById('name');
     const emailInput = document.getElementById('email');
     const submitBtn = document.getElementById('submitBtn');
     const mensagem = document.getElementById('mensagem');
@@ -61,23 +54,7 @@
 
     let countdownInterval; // Variável para controlar o timer
 
-    nameInput.addEventListener('input', validateName);
     emailInput.addEventListener('input', validateEmail);
-
-    function validateName() {
-        const name = nameInput.value.trim();
-        const error = document.getElementById('nameError');
-        if (name.length < 2) {
-            error.textContent = 'Nome deve ter pelo menos 2 caracteres';
-            return false;
-        }
-        if (!/^[A-Za-zÀ-ÿ\s]+$/.test(name)) {
-            error.textContent = 'Nome deve conter apenas letras';
-            return false;
-        }
-        error.textContent = '';
-        return true;
-    }
 
     function validateEmail() {
         const email = emailInput.value.trim();
@@ -92,10 +69,9 @@
     }
 
     function validateForm() {
-        return validateName() && validateEmail();
+        return validateEmail();
     }
 
-    // NOVA FUNÇÃO PARA O CRONÔMETRO
     function startCountdown(expirationDateString) {
         if (countdownInterval) {
             clearInterval(countdownInterval);
@@ -110,7 +86,7 @@
             if (distance < 0) {
                 clearInterval(countdownInterval);
                 countdownTimerP.textContent = "QR Code Expirado!";
-                qrCodeImage.style.opacity = '0.2'; // Deixa o QR Code esmaecido
+                qrCodeImage.style.opacity = '0.2';
                 return;
             }
 
@@ -137,7 +113,8 @@
         form.classList.add('loading');
         mensagem.textContent = '';
 
-        const data = { name: nameInput.value.trim(), email: emailInput.value.trim() };
+        // Objeto de dados agora envia apenas o email
+        const data = { email: emailInput.value.trim() };
 
         try {
             const response = await fetch('/api/pix', {
@@ -160,7 +137,6 @@
             qrCodeImage.src = 'data:image/png;base64,' + qrCodeData.encodedImage;
             pixPayloadInput.value = qrCodeData.payload;
 
-            // Inicia o cronômetro com a data do backend
             startCountdown(qrCodeData.expirationDate);
 
             if (qrCodeData.allowsMultiplePayments) {
