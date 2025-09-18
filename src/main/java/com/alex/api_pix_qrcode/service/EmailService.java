@@ -55,10 +55,9 @@ public class EmailService {
         }
     }
 
-    // Método genérico para envio de e-mail
     private void sendEmail(String to, String subject, String text) {
         SimpleMailMessage message = new SimpleMailMessage();
-        message.setFrom("seuemail@gmail.com"); // Altere para seu e-mail real
+        message.setFrom("alex.diasritter@gmail.com");
         message.setTo(to);
         message.setSubject(subject);
         message.setText(text);
