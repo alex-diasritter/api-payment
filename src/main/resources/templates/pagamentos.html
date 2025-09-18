@@ -4,14 +4,13 @@
     <meta charset="UTF-8">
     <title>Pagamento Pix</title>
     <link rel="stylesheet" th:href="@{/css/style.css}">
-
 </head>
 <body>
 <div class="container">
 
     <div class="header">
-        <h2>Pagamento Pix</h2>
-        <p>Preencha os dados para continuar</p>
+        <h2 id="headerTitle">Pagamento Pix</h2>
+        <p id="headerSubtitle">Preencha os dados para continuar</p>
     </div>
 
     <form id="pixForm">
@@ -22,19 +21,23 @@
         </div>
 
         <div class="form-group">
-            <label for="cpfCnpj">CPF:</label>
-            <input type="text" id="cpfCnpj" name="cpfCnpj" required placeholder="000.000.000-00" maxlength="14">
-            <div class="error" id="cpfError"></div>
-        </div>
-
-        <div class="form-group">
-            <label for="value">Valor (mínimo R$ 0,01):</label>
-            <input type="text" id="value" name="value" required placeholder="0,00" maxlength="10">
-            <div class="error" id="valueError"></div>
+            <label for="email">Email:</label>
+            <input type="email" id="email" name="email" required placeholder="seu@email.com">
+            <div class="error" id="emailError"></div>
         </div>
 
         <button type="submit" id="submitBtn">Gerar Pagamento</button>
     </form>
+
+    <div id="pixDetails" style="display: none;">
+        <img id="qrCodeImage" src="" alt="QR Code Pix" class="qr-code">
+        <p id="countdownTimer" class="expiration-text"></p>
+        <div class="payload-container">
+            <input type="text" id="pixPayload" readonly>
+            <button id="copyBtn" class="copy-btn">Copiar</button>
+        </div>
+        <p id="multiplePayments" class="info-text"></p>
+    </div>
 
     <p id="mensagem"></p>
 
@@ -42,149 +45,99 @@
 
 <script>
     const form = document.getElementById('pixForm');
-    const mensagem = document.getElementById('mensagem');
-    const submitBtn = document.getElementById('submitBtn');
-
-    // Máscara e validação de CPF
-    const cpfInput = document.getElementById('cpfCnpj');
-    cpfInput.addEventListener('input', (e) => {
-        let value = e.target.value.replace(/\D/g, ''); // Remove não-dígitos
-
-        // Aplica máscara CPF
-        if (value.length <= 11) {
-            value = value.replace(/(\d{3})(\d)/, '$1.$2');
-            value = value.replace(/(\d{3})(\d)/, '$1.$2');
-            value = value.replace(/(\d{3})(\d{1,2})$/, '$1-$2');
-        }
-
-        e.target.value = value;
-        validateCPF();
-    });
-
-    // Máscara de valor monetário
-    const valueInput = document.getElementById('value');
-    valueInput.addEventListener('input', (e) => {
-        let value = e.target.value.replace(/\D/g, '');
-
-        if (value.length > 0) {
-            value = (parseInt(value) / 100).toFixed(2);
-            value = value.replace('.', ',');
-            value = value.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
-        }
-
-        e.target.value = value;
-        validateValue();
-    });
-
-    // Validação de nome
     const nameInput = document.getElementById('name');
+    const emailInput = document.getElementById('email');
+    const submitBtn = document.getElementById('submitBtn');
+    const mensagem = document.getElementById('mensagem');
+
+    const pixDetails = document.getElementById('pixDetails');
+    const headerTitle = document.getElementById('headerTitle');
+    const headerSubtitle = document.getElementById('headerSubtitle');
+    const qrCodeImage = document.getElementById('qrCodeImage');
+    const pixPayloadInput = document.getElementById('pixPayload');
+    const multiplePaymentsP = document.getElementById('multiplePayments');
+    const copyBtn = document.getElementById('copyBtn');
+    const countdownTimerP = document.getElementById('countdownTimer');
+
+    let countdownInterval; // Variável para controlar o timer
+
     nameInput.addEventListener('input', validateName);
+    emailInput.addEventListener('input', validateEmail);
 
     function validateName() {
         const name = nameInput.value.trim();
         const error = document.getElementById('nameError');
-
         if (name.length < 2) {
             error.textContent = 'Nome deve ter pelo menos 2 caracteres';
             return false;
         }
-
         if (!/^[A-Za-zÀ-ÿ\s]+$/.test(name)) {
             error.textContent = 'Nome deve conter apenas letras';
             return false;
         }
-
         error.textContent = '';
         return true;
     }
 
-    function validateCPF() {
-        const cpf = cpfInput.value.replace(/\D/g, '');
-        const error = document.getElementById('cpfError');
-
-        if (cpf.length !== 11) {
-            error.textContent = 'CPF deve ter 11 dígitos';
+    function validateEmail() {
+        const email = emailInput.value.trim();
+        const error = document.getElementById('emailError');
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(email)) {
+            error.textContent = 'Por favor, insira um email válido.';
             return false;
         }
-
-        // Verifica sequências iguais
-        if (/^(\d)\1+$/.test(cpf)) {
-            error.textContent = 'CPF inválido';
-            return false;
-        }
-
-        // Algoritmo de validação CPF
-        let sum = 0;
-        for (let i = 0; i < 9; i++) {
-            sum += parseInt(cpf[i]) * (10 - i);
-        }
-        let digit1 = (sum * 10) % 11;
-        if (digit1 === 10) digit1 = 0;
-
-        if (digit1 !== parseInt(cpf[9])) {
-            error.textContent = 'CPF inválido';
-            return false;
-        }
-
-        sum = 0;
-        for (let i = 0; i < 10; i++) {
-            sum += parseInt(cpf[i]) * (11 - i);
-        }
-        let digit2 = (sum * 10) % 11;
-        if (digit2 === 10) digit2 = 0;
-
-        if (digit2 !== parseInt(cpf[10])) {
-            error.textContent = 'CPF inválido';
-            return false;
-        }
-
-        error.textContent = '';
-        return true;
-    }
-
-    function validateValue() {
-        const valueStr = valueInput.value.replace(/\./g, '').replace(',', '.');
-        const value = parseFloat(valueStr);
-        const error = document.getElementById('valueError');
-
-        if (isNaN(value) || value < 0.01) {
-            error.textContent = 'Valor não pode ser 0.00';
-            return false;
-        }
-
-        if (value > 1000000) {
-            error.textContent = 'Valor máximo é R$ 1.000.000,00';
-            return false;
-        }
-
         error.textContent = '';
         return true;
     }
 
     function validateForm() {
-        return validateName() && validateCPF() && validateValue();
+        return validateName() && validateEmail();
+    }
+
+    // NOVA FUNÇÃO PARA O CRONÔMETRO
+    function startCountdown(expirationDateString) {
+        if (countdownInterval) {
+            clearInterval(countdownInterval);
+        }
+
+        const expirationTime = new Date(expirationDateString).getTime();
+
+        countdownInterval = setInterval(() => {
+            const now = new Date().getTime();
+            const distance = expirationTime - now;
+
+            if (distance < 0) {
+                clearInterval(countdownInterval);
+                countdownTimerP.textContent = "QR Code Expirado!";
+                qrCodeImage.style.opacity = '0.2'; // Deixa o QR Code esmaecido
+                return;
+            }
+
+            const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+            const formattedSeconds = seconds < 10 ? '0' + seconds : seconds;
+            const formattedMinutes = minutes < 10 ? '0' + minutes : minutes;
+
+            countdownTimerP.textContent = `Expira em: ${formattedMinutes}:${formattedSeconds}`;
+        }, 1000);
     }
 
     form.addEventListener('submit', async (e) => {
         e.preventDefault();
-
         if (!validateForm()) {
             mensagem.textContent = 'Por favor, corrija os erros acima';
             mensagem.style.color = '#e74c3c';
             return;
         }
 
-        // Estado de loading
         submitBtn.textContent = 'Processando...';
         submitBtn.disabled = true;
         form.classList.add('loading');
         mensagem.textContent = '';
 
-        const data = {
-            name: form.name.value.trim(),
-            cpfCnpj: form.cpfCnpj.value.replace(/\D/g, ''), // Remove máscara
-            value: form.value.value.replace(/\./g, '').replace(',', '.') // Converte para formato americano
-        };
+        const data = { name: nameInput.value.trim(), email: emailInput.value.trim() };
 
         try {
             const response = await fetch('/api/pix', {
@@ -194,42 +147,44 @@
             });
 
             if (!response.ok) {
-                let errorMessage = 'Erro no servidor';
-                try {
-                    const errorData = await response.json();
-                    errorMessage = errorData.message || errorMessage;
-                } catch (e) {
-                    errorMessage = `Erro ${response.status}: ${response.statusText}`;
-                }
-
-                throw new Error(errorMessage);
+                const errorData = await response.json().catch(() => ({ message: `Erro ${response.status}` }));
+                throw new Error(errorData.message || 'Erro ao gerar o pagamento.');
             }
 
-            const linkPagamento = await response.text();
+            const qrCodeData = await response.json();
 
-            mensagem.textContent = 'Redirecionando para pagamento...';
-            mensagem.style.color = '#27ae60';
+            headerTitle.textContent = 'Pague com Pix';
+            headerSubtitle.textContent = 'Escaneie o QR Code ou copie o código';
+            form.style.display = 'none';
 
-            // Pequeno delay para mostrar mensagem
-            setTimeout(() => {
-                window.location.href = linkPagamento;
-            }, 1000);
+            qrCodeImage.src = 'data:image/png;base64,' + qrCodeData.encodedImage;
+            pixPayloadInput.value = qrCodeData.payload;
+
+            // Inicia o cronômetro com a data do backend
+            startCountdown(qrCodeData.expirationDate);
+
+            if (qrCodeData.allowsMultiplePayments) {
+                multiplePaymentsP.textContent = 'Este QR Code aceita múltiplos pagamentos.';
+            }
+
+            pixDetails.style.display = 'flex';
 
         } catch (err) {
             console.error('Erro:', err);
-            mensagem.textContent = err.message || 'Erro ao criar pagamento. Tente novamente.';
+            mensagem.textContent = err.message;
             mensagem.style.color = '#e74c3c';
         } finally {
-            // Restaura botão
             submitBtn.textContent = 'Gerar Pagamento';
             submitBtn.disabled = false;
             form.classList.remove('loading');
         }
     });
 
-    // Validação em tempo real
-    [nameInput, cpfInput, valueInput].forEach(input => {
-        input.addEventListener('blur', validateForm);
+    copyBtn.addEventListener('click', () => {
+        navigator.clipboard.writeText(pixPayloadInput.value).then(() => {
+            copyBtn.textContent = 'Copiado!';
+            setTimeout(() => { copyBtn.textContent = 'Copiar'; }, 2000);
+        });
     });
 </script>
 
