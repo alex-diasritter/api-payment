@@ -39,7 +39,7 @@ public class EmailService {
         NumberFormat formatter = NumberFormat.getCurrencyInstance(new Locale("pt", "BR"));
         String formattedValue = formatter.format(value);
         String text = String.format(
-                "Saudações!,\nRecebemos seu pagamento de via Pix no valor de: R$ %.2f..\n\nObrigado por utilizar nosso serviço!\n\nAtenciosamente,\nEquipe Pix QRCode",
+                "Saudações!,\nRecebemos seu pagamento via Pix no valor de: R$ %.2f..\n\nObrigado por utilizar nosso serviço!\n\nAtenciosamente,\nAlex Ritter",
                 value
         );
         sendEmail(email, subject, text);
