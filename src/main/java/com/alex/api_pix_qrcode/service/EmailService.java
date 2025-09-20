@@ -26,8 +26,8 @@ public class EmailService {
     private JavaMailSender mailSender;
 
     // Armazena nome e e-mail do cliente
-    public void storeUserInfo(PixRequestDto dto) {
-        list.add(dto.email());
+    public void storeUserInfo(String email) {
+        list.add(email);
     }
 
     // Envia o e-mail de confirmação de pagamento
