@@ -1,189 +1,432 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <title>Pagamento Pix</title>
-    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Campo de Email</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap');
 
+        :root {
+            --bg-dark: #1e1e2f;
+            --surface-dark: #2c2c3e;
+            --primary-blue: #4e9af1;
+            --primary-blue-hover: #3671c3;
+            --text-primary: #f0f0f0;
+            --text-secondary: #aaaaaa;
+            --border-color: #555;
+            --error-red: #e74c3c;
+            --success-green: #27ae60;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: var(--bg-dark);
+            color: var(--text-primary);
+            font-family: 'Poppins', sans-serif;
+            padding: 20px;
+        }
+
+        .container {
+            background: var(--surface-dark);
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.5);
+            width: 100%;
+            max-width: 450px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+
+        .header h2 {
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: var(--primary-blue);
+        }
+
+        .header p {
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+
+        /* --- DETALHES DO PIX (QR CODE) --- */
+        #pixDetails {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            gap: 18px;
+            width: 100%;
+            margin-top: 20px;
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .qr-code-container {
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: white;
+            padding: 15px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .qr-code {
+            width: 100%;
+            max-width: 250px;
+            height: auto;
+            border-radius: 8px;
+            display: block;
+        }
+
+        .expiration-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border-radius: 8px;
+            color: white;
+            font-weight: bold;
+            font-size: 18px;
+        }
+
+        .payload-container {
+            display: flex;
+            width: 100%;
+            gap: 10px;
+            align-items: center;
+        }
+
+        #pixPayload {
+            flex-grow: 1;
+            font-size: 12px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            padding: 12px;
+        }
+
+        .copy-btn {
+            padding: 12px 16px;
+            margin-top: 0;
+            flex-shrink: 0;
+            width: auto;
+            font-size: 14px;
+        }
+
+        .expiration-text, .info-text {
+            font-size: 14px;
+            color: var(--text-secondary);
+            text-align: center;
+        }
+
+        .countdown-warning {
+            color: #ff9966;
+            font-weight: 500;
+        }
+
+        .countdown-danger {
+            color: var(--error-red);
+            font-weight: 600;
+            animation: pulse 1s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.6; }
+            100% { opacity: 1; }
+        }
+
+        .spinner {
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 1s ease-in-out infinite;
+            display: inline-block;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .form-group {
+            margin-bottom: 18px;
+            text-align: left;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text-secondary);
+        }
+
+        input {
+            width: 100%;
+            padding: 14px 15px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            background: var(--bg-dark);
+            color: var(--text-primary);
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+
+        input:focus {
+            border-color: var(--primary-blue);
+            box-shadow: 0 0 8px rgba(78, 154, 241, 0.5);
+            outline: none;
+            transform: translateY(-2px);
+        }
+
+        button {
+            width: 100%;
+            padding: 16px;
+            border: none;
+            border-radius: 8px;
+            background: var(--primary-blue);
+            color: #ffffff;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 15px;
+            transition: all 0.3s ease;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+        }
+
+        button:hover:not(:disabled) {
+            background: var(--primary-blue-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(78, 154, 241, 0.3);
+        }
+
+        button:disabled {
+            background-color: #555;
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
+
+        .error {
+            color: var(--error-red);
+            font-size: 12px;
+            margin-top: 6px;
+            display: block;
+            min-height: 18px;
+        }
+
+        #mensagem {
+            margin-top: 20px;
+            text-align: center;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .success {
+            color: var(--success-green);
+            background-color: rgba(39, 174, 96, 0.1);
+            border: 1px solid rgba(39, 174, 96, 0.2);
+        }
+
+        .error-message {
+            background-color: rgba(231, 76, 60, 0.1);
+            border: 1px solid rgba(231, 76, 60, 0.2);
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                padding: 20px;
+            }
+
+            .payload-container {
+                flex-direction: column;
+            }
+
+            .copy-btn {
+                width: 100%;
+            }
+
+            input, button {
+                padding: 12px;
+            }
+        }
+    </style>
 </head>
 <body>
 <div class="container">
-
     <div class="header">
-        <h2>Pagamento Pix</h2>
-        <p>Preencha os dados para continuar</p>
+        <h2 id="headerTitle">Pagamento PIX</h2>
+        <p id="headerSubtitle">Digite seu email para gerar o QR Code</p>
     </div>
 
-    <form id="pixForm">
+    <form id="emailForm">
         <div class="form-group">
-            <label for="name">Nome:</label>
-            <input type="text" id="name" name="name" required minlength="2" maxlength="50">
-            <div class="error" id="nameError"></div>
+            <label for="email">Email:</label>
+            <input type="email" id="email" name="email" required placeholder="seuemail@exemplo.com" maxlength="100">
+            <div class="error" id="emailError"></div>
         </div>
 
-        <div class="form-group">
-            <label for="cpfCnpj">CPF:</label>
-            <input type="text" id="cpfCnpj" name="cpfCnpj" required placeholder="000.000.000-00" maxlength="14">
-            <div class="error" id="cpfError"></div>
-        </div>
-
-        <div class="form-group">
-            <label for="value">Valor (mínimo R$ 0,01):</label>
-            <input type="text" id="value" name="value" required placeholder="0,00" maxlength="10">
-            <div class="error" id="valueError"></div>
-        </div>
-
-        <button type="submit" id="submitBtn">Gerar Pagamento</button>
+        <button type="submit" id="submitBtn">
+            <i class="fas fa-qrcode"></i> Gerar Pagamento PIX
+        </button>
     </form>
 
-    <p id="mensagem"></p>
+    <div id="pixDetails">
+        <div class="qr-code-container">
+            <img id="qrCodeImage" src="" alt="QR Code Pix" class="qr-code">
+            <div id="expirationOverlay" class="expiration-overlay" style="display: none;">
+                Expirado
+            </div>
+        </div>
+        <p id="countdownTimer" class="expiration-text"></p>
+        <div class="payload-container">
+            <input type="text" id="pixPayload" readonly>
+            <button id="copyBtn" class="copy-btn">
+                <i class="fas fa-copy"></i> Copiar
+            </button>
+        </div>
+        <p id="multiplePayments" class="info-text"></p>
+    </div>
 
+    <p id="mensagem"></p>
 </div>
 
 <script>
-    const form = document.getElementById('pixForm');
-    const mensagem = document.getElementById('mensagem');
+    const form = document.getElementById('emailForm');
+    const emailInput = document.getElementById('email');
     const submitBtn = document.getElementById('submitBtn');
+    const mensagem = document.getElementById('mensagem');
 
-    // Máscara e validação de CPF
-    const cpfInput = document.getElementById('cpfCnpj');
-    cpfInput.addEventListener('input', (e) => {
-        let value = e.target.value.replace(/\D/g, ''); // Remove não-dígitos
+    const pixDetails = document.getElementById('pixDetails');
+    const headerTitle = document.getElementById('headerTitle');
+    const headerSubtitle = document.getElementById('headerSubtitle');
+    const qrCodeImage = document.getElementById('qrCodeImage');
+    const expirationOverlay = document.getElementById('expirationOverlay');
+    const pixPayloadInput = document.getElementById('pixPayload');
+    const multiplePaymentsP = document.getElementById('multiplePayments');
+    const copyBtn = document.getElementById('copyBtn');
+    const countdownTimerP = document.getElementById('countdownTimer');
 
-        // Aplica máscara CPF
-        if (value.length <= 11) {
-            value = value.replace(/(\d{3})(\d)/, '$1.$2');
-            value = value.replace(/(\d{3})(\d)/, '$1.$2');
-            value = value.replace(/(\d{3})(\d{1,2})$/, '$1-$2');
-        }
+    const emailError = document.getElementById('emailError');
 
-        e.target.value = value;
-        validateCPF();
-    });
+    let countdownInterval;
 
-    // Máscara de valor monetário
-    const valueInput = document.getElementById('value');
-    valueInput.addEventListener('input', (e) => {
-        let value = e.target.value.replace(/\D/g, '');
+    // Validação de email
+    function validateEmail() {
+        const email = emailInput.value.trim();
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-        if (value.length > 0) {
-            value = (parseInt(value) / 100).toFixed(2);
-            value = value.replace('.', ',');
-            value = value.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
-        }
-
-        e.target.value = value;
-        validateValue();
-    });
-
-    // Validação de nome
-    const nameInput = document.getElementById('name');
-    nameInput.addEventListener('input', validateName);
-
-    function validateName() {
-        const name = nameInput.value.trim();
-        const error = document.getElementById('nameError');
-
-        if (name.length < 2) {
-            error.textContent = 'Nome deve ter pelo menos 2 caracteres';
+        if (email === '') {
+            emailError.textContent = 'Email é obrigatório';
             return false;
         }
 
-        if (!/^[A-Za-zÀ-ÿ\s]+$/.test(name)) {
-            error.textContent = 'Nome deve conter apenas letras';
+        if (!emailRegex.test(email)) {
+            emailError.textContent = 'Digite um email válido';
             return false;
         }
 
-        error.textContent = '';
+        if (email.length > 100) {
+            emailError.textContent = 'Email muito longo';
+            return false;
+        }
+
+        emailError.textContent = '';
         return true;
     }
 
-    function validateCPF() {
-        const cpf = cpfInput.value.replace(/\D/g, '');
-        const error = document.getElementById('cpfError');
-
-        if (cpf.length !== 11) {
-            error.textContent = 'CPF deve ter 11 dígitos';
-            return false;
+    function startCountdown(expirationDateString) {
+        if (countdownInterval) {
+            clearInterval(countdownInterval);
         }
 
-        // Verifica sequências iguais
-        if (/^(\d)\1+$/.test(cpf)) {
-            error.textContent = 'CPF inválido';
-            return false;
-        }
+        const expirationTime = new Date(expirationDateString).getTime();
 
-        // Algoritmo de validação CPF
-        let sum = 0;
-        for (let i = 0; i < 9; i++) {
-            sum += parseInt(cpf[i]) * (10 - i);
-        }
-        let digit1 = (sum * 10) % 11;
-        if (digit1 === 10) digit1 = 0;
+        countdownInterval = setInterval(() => {
+            const now = new Date().getTime();
+            const distance = expirationTime - now;
 
-        if (digit1 !== parseInt(cpf[9])) {
-            error.textContent = 'CPF inválido';
-            return false;
-        }
+            if (distance < 0) {
+                clearInterval(countdownInterval);
+                countdownTimerP.textContent = "QR Code Expirado!";
+                countdownTimerP.className = 'expiration-text countdown-danger';
+                qrCodeImage.style.opacity = '0.3';
+                expirationOverlay.style.display = 'flex';
+                return;
+            }
 
-        sum = 0;
-        for (let i = 0; i < 10; i++) {
-            sum += parseInt(cpf[i]) * (11 - i);
-        }
-        let digit2 = (sum * 10) % 11;
-        if (digit2 === 10) digit2 = 0;
+            const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((distance % (1000 * 60)) / 1000);
 
-        if (digit2 !== parseInt(cpf[10])) {
-            error.textContent = 'CPF inválido';
-            return false;
-        }
+            const formattedSeconds = seconds < 10 ? '0' + seconds : seconds;
+            const formattedMinutes = minutes < 10 ? '0' + minutes : minutes;
 
-        error.textContent = '';
-        return true;
+            countdownTimerP.textContent = `Expira em: ${formattedMinutes}:${formattedSeconds}`;
+
+            // Adicionar classes de aviso conforme o tempo diminui
+            if (minutes < 2) {
+                countdownTimerP.className = 'expiration-text countdown-danger';
+            } else if (minutes < 5) {
+                countdownTimerP.className = 'expiration-text countdown-warning';
+            } else {
+                countdownTimerP.className = 'expiration-text';
+            }
+        }, 1000);
     }
 
-    function validateValue() {
-        const valueStr = valueInput.value.replace(/\./g, '').replace(',', '.');
-        const value = parseFloat(valueStr);
-        const error = document.getElementById('valueError');
+    // Validação em tempo real
+    emailInput.addEventListener('input', validateEmail);
+    emailInput.addEventListener('blur', validateEmail);
 
-        if (isNaN(value) || value < 0.01) {
-            error.textContent = 'Valor não pode ser 0.00';
-            return false;
-        }
-
-        if (value > 1000000) {
-            error.textContent = 'Valor máximo é R$ 1.000.000,00';
-            return false;
-        }
-
-        error.textContent = '';
-        return true;
-    }
-
-    function validateForm() {
-        return validateName() && validateCPF() && validateValue();
-    }
-
+    // Submissão do formulário
     form.addEventListener('submit', async (e) => {
         e.preventDefault();
 
-        if (!validateForm()) {
-            mensagem.textContent = 'Por favor, corrija os erros acima';
-            mensagem.style.color = '#e74c3c';
+        if (!validateEmail()) {
+            mensagem.textContent = 'Por favor, digite um email válido';
+            mensagem.className = 'error-message';
             return;
         }
 
-        // Estado de loading
-        submitBtn.textContent = 'Processando...';
+        submitBtn.innerHTML = '<span class="spinner"></span> Gerando QR Code...';
         submitBtn.disabled = true;
-        form.classList.add('loading');
         mensagem.textContent = '';
+        mensagem.className = '';
 
         const data = {
-            name: form.name.value.trim(),
-            cpfCnpj: form.cpfCnpj.value.replace(/\D/g, ''), // Remove máscara
-            value: form.value.value.replace(/\./g, '').replace(',', '.') // Converte para formato americano
+            email: emailInput.value.trim()
         };
 
         try {
@@ -205,33 +448,59 @@
                 throw new Error(errorMessage);
             }
 
-            const linkPagamento = await response.text();
+            const qrCodeData = await response.json();
 
-            mensagem.textContent = 'Redirecionando para pagamento...';
-            mensagem.style.color = '#27ae60';
+            // Muda o cabeçalho e esconde o formulário
+            headerTitle.textContent = 'Pague com PIX';
+            headerSubtitle.textContent = 'Escaneie o QR Code ou copie o código';
+            form.style.display = 'none';
 
-            // Pequeno delay para mostrar mensagem
-            setTimeout(() => {
-                window.location.href = linkPagamento;
-            }, 1000);
+            // Exibe o QR Code e dados do PIX
+            qrCodeImage.src = 'data:image/png;base64,' + qrCodeData.encodedImage;
+            pixPayloadInput.value = qrCodeData.payload;
+
+            // Resetar estilos do QR Code
+            qrCodeImage.style.opacity = '1';
+            expirationOverlay.style.display = 'none';
+
+            // Inicia o countdown
+            startCountdown(qrCodeData.expirationDate);
+
+            // Verifica se aceita múltiplos pagamentos
+            if (qrCodeData.allowsMultiplePayments) {
+                multiplePaymentsP.textContent = 'Este QR Code aceita múltiplos pagamentos.';
+            } else {
+                multiplePaymentsP.textContent = '';
+            }
+
+            // Mostra a seção do PIX
+            pixDetails.style.display = 'flex';
+            mensagem.textContent = 'QR Code gerado com sucesso!';
+            mensagem.className = 'success';
 
         } catch (err) {
             console.error('Erro:', err);
-            mensagem.textContent = err.message || 'Erro ao criar pagamento. Tente novamente.';
-            mensagem.style.color = '#e74c3c';
+            mensagem.textContent = err.message || 'Erro ao processar a solicitação';
+            mensagem.className = 'error-message';
         } finally {
-            // Restaura botão
-            submitBtn.textContent = 'Gerar Pagamento';
+            submitBtn.innerHTML = '<i class="fas fa-qrcode"></i> Gerar Pagamento PIX';
             submitBtn.disabled = false;
-            form.classList.remove('loading');
         }
     });
 
-    // Validação em tempo real
-    [nameInput, cpfInput, valueInput].forEach(input => {
-        input.addEventListener('blur', validateForm);
+    // Botão de copiar código PIX
+    copyBtn.addEventListener('click', () => {
+        navigator.clipboard.writeText(pixPayloadInput.value).then(() => {
+            const originalText = copyBtn.innerHTML;
+            copyBtn.innerHTML = '<i class="fas fa-check"></i> Copiado!';
+            setTimeout(() => { copyBtn.innerHTML = originalText; }, 2000);
+        });
+    });
+
+    // Focar no input de email ao carregar
+    window.addEventListener('load', () => {
+        emailInput.focus();
     });
 </script>
-
 </body>
 </html>
