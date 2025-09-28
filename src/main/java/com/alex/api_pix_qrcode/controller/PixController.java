@@ -3,7 +3,6 @@ import com.alex.api_pix_qrcode.dto.PixRequestDto;
 import com.alex.api_pix_qrcode.dto.PixResponseDto;
 import com.alex.api_pix_qrcode.service.EmailService;
 import com.alex.api_pix_qrcode.service.PixService;
-import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

@@ -35,6 +35,7 @@ public class EmailService {
         String email = list.get(cont);
         cont++;
         String subject = "Confirmação de pagamento via Pix";
+
         // Formata o valor para moeda brasileira
         NumberFormat formatter = NumberFormat.getCurrencyInstance(new Locale("pt", "BR"));
         String formattedValue = formatter.format(value);
